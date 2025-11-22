@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Order Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #020617;
+      --bg-soft: rgba(15, 23, 42, 0.85);
+      --accent: #22c55e;
+      --accent-soft: rgba(34, 197, 94, 0.12);
+      --accent-strong: #4ade80;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --border-subtle: rgba(148, 163, 184, 0.35);
+      --danger: #f97373;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 16px;
+      background:
+        radial-gradient(circle at top left, #1e293b 0, transparent 55%),
+        radial-gradient(circle at bottom right, #0f766e 0, transparent 55%),
+        var(--bg);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .shell {
+      width: 100%;
+      max-width: 860px;
+      border-radius: 26px;
+      background: linear-gradient(145deg, rgba(15,23,42,0.95), rgba(15,23,42,0.88));
+      box-shadow:
+        0 22px 60px rgba(0,0,0,0.78),
+        0 0 0 1px rgba(148,163,184,0.35);
+      overflow: hidden;
+      backdrop-filter: blur(20px);
+    }
+
+    .shell-header {
+      padding: 20px 26px 16px;
+      border-bottom: 1px solid rgba(148,163,184,0.35);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-dot {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 30%, var(--accent-strong), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1rem;
+      color: #022c22;
+      box-shadow: 0 0 0 7px var(--accent-soft);
+    }
+
+    .title-block h1 {
+      font-size: 1.35rem;
+      margin: 0;
+      letter-spacing: 0.02em;
+    }
+
+    .title-block p {
+      margin: 4px 0 0;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .badge {
+      margin-left: auto;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.6);
+      color: var(--text-muted);
+    }
+
+    .body {
+      padding: 20px 26px 22px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.1fr);
+      gap: 22px;
+    }
+
+    @media (max-width: 780px) {
+      .body {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+@media (max-width: 480px) {
+  body {
+    font-size: 15px;
+  }
+}
+
+    .group-label {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+    }
+
+    .field span.tag {
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.6);
+      color: var(--text-muted);
+    }
+
+    .file-wrap {
+      position: relative;
+      border-radius: 999px;
+      border: 1px dashed var(--border-subtle);
+      background: rgba(15,23,42,0.92);
+      padding: 11px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: border-color 0.18s ease, background 0.18s ease, transform 0.06s ease, box-shadow 0.12s ease;
+    }
+
+    .file-wrap span.icon {
+      font-size: 1.25rem;
+      opacity: 0.9;
+    }
+
+    .file-wrap span.main {
+      font-size: 0.9rem;
+    }
+
+    .file-wrap span.sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .file-wrap input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .file-wrap.dragover {
+      border-color: var(--accent-strong);
+      background: rgba(15,23,42,1);
+      transform: translateY(-1px);
+      box-shadow: 0 0 0 1px var(--accent-soft);
+    }
+
+    .file-status {
+      font-size: 0.8rem;
+      color: var(--accent-strong);
+      margin-top: 4px;
+    }
+
+    .hint-small {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .right-panel {
+      border-radius: 20px;
+      border: 1px solid rgba(148,163,184,0.35);
+      padding: 14px 16px 16px;
+      background: radial-gradient(circle at top left, rgba(34,197,94,0.09), transparent 70%);
+      font-size: 0.9rem;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .pill-status {
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      border: 1px solid rgba(148,163,184,0.4);
+      color: var(--text-muted);
+    }
+
+    .steps {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 10px;
+    }
+
+    .steps li {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .steps span.bullet {
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .steps span.text {
+      flex: 1;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    button[type="submit"] {
+      margin-top: 10px;
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 999px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: radial-gradient(circle at 20% 0, var(--accent-strong), var(--accent));
+      color: #022c22;
+      box-shadow: 0 12px 26px rgba(22,163,74,0.38);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.07s ease, box-shadow 0.12s ease, filter 0.12s ease;
+    }
+
+    button[type="submit"]:hover {
+      filter: brightness(1.05);
+      box-shadow: 0 16px 32px rgba(22,163,74,0.5);
+      transform: translateY(-1px);
+    }
+
+    button[type="submit"]:active {
+      transform: translateY(1px) scale(0.99);
+      box-shadow: 0 8px 18px rgba(22,163,74,0.38);
+    }
+
+    button[type="submit"] span.loader {
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      border: 2px solid rgba(22,163,74,0.2);
+      border-top-color: rgba(22,163,74,0.95);
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+
+    button[type="submit"].loading span.loader {
+      display: inline-flex;
+    }
+
+    button[type="submit"].loading span.label {
+      opacity: 0.75;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .footer-note {
+      padding: 0 26px 18px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .footer-note span.right {
+      text-align: right;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="shell-header">
+      <div class="logo-dot">OG</div>
+      <div class="title-block">
+        <h1>Reorder Report Generator</h1>
+        <p>Sales · Inventory · IRC · Ignore → one Excel workbook.</p>
+      </div>
+      <div class="badge">v1</div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+      <div class="body">
+        <div>
+          <div class="group-label">Input files (drag &amp; drop or tap)</div>
+
+          <div class="field">
+            <label>
+              <span>Sales file</span>
+              <span class="tag">Required</span>
+            </label>
+            <div class="file-wrap drop-zone" data-input="sales_file">
+              <span class="icon">📊</span>
+              <div>
+                <span class="main">Drop or choose <strong>sales.xlsx</strong></span><br>
+                <span class="sub">Main sales export from your system</span>
+                <div class="file-status" data-status="sales_file"></div>
+              </div>
+              <input id="sales_file" type="file" name="sales_file" accept=".xlsx" required>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>
+              <span>Inventory file</span>
+              <span class="tag">Optional</span>
+            </label>
+            <div class="file-wrap drop-zone" data-input="inventory_file">
+              <span class="icon">📦</span>
+              <div>
+                <span class="main">Drop or choose <strong>inventory.xlsx</strong></span><br>
+                <span class="sub">For On Hand &amp; IRC matching</span>
+                <div class="file-status" data-status="inventory_file"></div>
+              </div>
+              <input id="inventory_file" type="file" name="inventory_file" accept=".xlsx">
+            </div>
+          </div>
+
+          <div class="field">
+            <label>
+              <span>Ignore list</span>
+              <span class="tag">Optional</span>
+            </label>
+            <div class="file-wrap drop-zone" data-input="ignore_file">
+              <span class="icon">🚫</span>
+              <div>
+                <span class="main">Drop or choose <strong>ignore.xlsx</strong></span><br>
+                <span class="sub">Stock codes to exclude</span>
+                <div class="file-status" data-status="ignore_file"></div>
+              </div>
+              <input id="ignore_file" type="file" name="ignore_file" accept=".xlsx">
+            </div>
+          </div>
+
+          <div class="field">
+            <label>
+              <span>IRC list</span>
+              <span class="tag">Optional</span>
+            </label>
+            <div class="file-wrap drop-zone" data-input="irc_file">
+              <span class="icon">🏷️</span>
+              <div>
+                <span class="main">Drop or choose <strong>IRC.xlsx</strong></span><br>
+                <span class="sub">Rebate amounts &amp; start/end dates</span>
+                <div class="file-status" data-status="irc_file"></div>
+              </div>
+              <input id="irc_file" type="file" name="irc_file" accept=".xlsx">
+            </div>
+            <div class="hint-small">Use your IRC sheet renamed to the expected layout (Stock, Description, IRC, dates).</div>
+          </div>
+        </div>
+
+        <div class="right-panel">
+          <div class="status-row">
+            <span>What you’ll get</span>
+            <span class="pill-status">Excel · multi-sheet</span>
+          </div>
+          <ul class="steps">
+            <li>
+              <span class="bullet">1</span>
+              <span class="text">Upload your latest <strong>sales</strong>, plus <em>optional</em> inventory, ignore, and IRC lists.</span>
+            </li>
+            <li>
+              <span class="bullet">2</span>
+              <span class="text"><code>reorder_report.xlsx</code> is generated with FULL DATA, 1–4 WEEK SUPPLY, IRC, and IRC NEW ITEMS.</span>
+            </li>
+            <li>
+              <span class="bullet">3</span>
+              <span class="text">Your browser downloads the finished workbook ready for ordering.</span>
+            </li>
+          </ul>
+
+          <button type="submit" id="submitBtn">
+            <span class="loader"></span>
+            <span class="label">Generate report</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        <span>Runs your existing Python logic on the server.</span>
+        <span class="right">Drag files → click generate → done.</span>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const form = document.querySelector("form");
+    const btn = document.getElementById("submitBtn");
+
+    form.addEventListener("submit", () => {
+      btn.classList.add("loading");
+      btn.disabled = true;
+    });
+
+    function updateFileLabel(input) {
+      const statusEl = document.querySelector(`.file-status[data-status="${input.id}"]`);
+      if (!statusEl) return;
+
+      if (input.files && input.files.length > 0) {
+        statusEl.textContent = "File loaded: " + input.files[0].name;
+      } else {
+        statusEl.textContent = "";
+      }
+    }
+
+    // Drag & drop handling for each file zone + change events
+    document.querySelectorAll(".drop-zone").forEach(zone => {
+      const inputId = zone.getAttribute("data-input");
+      const input = document.getElementById(inputId);
+
+      const preventDefaults = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      };
+
+      ["dragenter", "dragover", "dragleave", "drop"].forEach(eventName => {
+        zone.addEventListener(eventName, preventDefaults, false);
+      });
+
+      ["dragenter", "dragover"].forEach(eventName => {
+        zone.addEventListener(eventName, () => {
+          zone.classList.add("dragover");
+        }, false);
+      });
+
+      ["dragleave", "drop"].forEach(eventName => {
+        zone.addEventListener(eventName, () => {
+          zone.classList.remove("dragover");
+        }, false);
+      });
+
+      zone.addEventListener("drop", (e) => {
+        const files = e.dataTransfer.files;
+        if (!files || !files.length) return;
+
+        // Only use the first file for each input, replacing any previous one
+        const dt = new DataTransfer();
+        dt.items.add(files[0]);
+        input.files = dt.files;
+        updateFileLabel(input);
+      });
+
+      // When user browses and selects a file
+      input.addEventListener("change", () => {
+        updateFileLabel(input);
+      });
+    });
+  </script>
+</body>
+</html>

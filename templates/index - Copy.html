@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Order Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #020617;
+      --bg-soft: rgba(15, 23, 42, 0.85);
+      --accent: #22c55e;
+      --accent-soft: rgba(34, 197, 94, 0.12);
+      --accent-strong: #4ade80;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --border-subtle: rgba(148, 163, 184, 0.35);
+      --danger: #f97373;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, #1e293b 0, transparent 55%),
+        radial-gradient(circle at bottom right, #0f766e 0, transparent 55%),
+        var(--bg);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .shell {
+      width: 100%;
+      max-width: 780px;
+      border-radius: 24px;
+      background: linear-gradient(145deg, rgba(15,23,42,0.95), rgba(15,23,42,0.85));
+      box-shadow:
+        0 18px 55px rgba(0,0,0,0.75),
+        0 0 0 1px rgba(148,163,184,0.35);
+      overflow: hidden;
+      backdrop-filter: blur(18px);
+    }
+
+    .shell-header {
+      padding: 18px 22px 14px;
+      border-bottom: 1px solid rgba(148,163,184,0.35);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-dot {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 30%, var(--accent-strong), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: #022c22;
+      box-shadow: 0 0 0 6px var(--accent-soft);
+    }
+
+    .title-block h1 {
+      font-size: 1.1rem;
+      margin: 0;
+      letter-spacing: 0.02em;
+    }
+
+    .title-block p {
+      margin: 2px 0 0;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .badge {
+      margin-left: auto;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.6);
+      color: var(--text-muted);
+    }
+
+    .body {
+      padding: 18px 22px 20px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    @media (max-width: 720px) {
+      .body {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .group-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .field {
+      margin-bottom: 12px;
+    }
+
+    .field label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+
+    .field span.tag {
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.6);
+      color: var(--text-muted);
+    }
+
+    .file-wrap {
+      position: relative;
+      border-radius: 999px;
+      border: 1px dashed var(--border-subtle);
+      background: rgba(15,23,42,0.9);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: border-color 0.18s ease, background 0.18s ease, transform 0.06s ease;
+    }
+
+    .file-wrap:hover {
+      border-color: var(--accent-strong);
+      background: rgba(15,23,42,1);
+      transform: translateY(-1px);
+    }
+
+    .file-wrap span.icon {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    .file-wrap span.main {
+      font-size: 0.8rem;
+    }
+
+    .file-wrap span.sub {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .file-wrap input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .hint-small {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .right-panel {
+      border-radius: 18px;
+      border: 1px solid rgba(148,163,184,0.35);
+      padding: 12px 14px;
+      background: radial-gradient(circle at top left, rgba(34,197,94,0.09), transparent 65%);
+      font-size: 0.8rem;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .pill-status {
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      border: 1px solid rgba(148,163,184,0.4);
+      color: var(--text-muted);
+    }
+
+    .steps {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 6px;
+    }
+
+    .steps li {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      margin-bottom: 6px;
+    }
+
+    .steps span.bullet {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .steps span.text {
+      flex: 1;
+      color: var(--text-muted);
+    }
+
+    button[type="submit"] {
+      margin-top: 6px;
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: radial-gradient(circle at 20% 0, var(--accent-strong), var(--accent));
+      color: #022c22;
+      box-shadow: 0 10px 22px rgba(22,163,74,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: transform 0.07s ease, box-shadow 0.12s ease, filter 0.12s ease;
+    }
+
+    button[type="submit"]:hover {
+      filter: brightness(1.05);
+      box-shadow: 0 14px 30px rgba(22,163,74,0.45);
+      transform: translateY(-1px);
+    }
+
+    button[type="submit"]:active {
+      transform: translateY(1px) scale(0.99);
+      box-shadow: 0 6px 16px rgba(22,163,74,0.35);
+    }
+
+    button[type="submit"] span.loader {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      border: 2px solid rgba(22,163,74,0.2);
+      border-top-color: rgba(22,163,74,0.95);
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+
+    button[type="submit"].loading span.loader {
+      display: inline-flex;
+    }
+
+    button[type="submit"].loading span.label {
+      opacity: 0.75;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .footer-note {
+      padding: 0 22px 16px;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .footer-note span.right {
+      text-align: right;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="shell-header">
+      <div class="logo-dot">OG</div>
+      <div class="title-block">
+        <h1>Reorder Report Generator</h1>
+        <p>Sales + Inventory + IRC → one Excel workbook.</p>
+      </div>
+      <div class="badge">v1</div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+      <div class="body">
+        <div>
+          <div class="group-label">Input files</div>
+
+          <div class="field">
+            <label>
+              <span>Sales file</span>
+              <span class="tag">Required</span>
+            </label>
+            <div class="file-wrap">
+              <span class="icon">📊</span>
+              <div>
+                <span class="main">Choose sales.xlsx</span><br>
+                <span class="sub">Main sales export from your system</span>
+              </div>
+              <input type="file" name="sales_file" accept=".xlsx" required>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>
+              <span>Inventory file</span>
+              <span class="tag">Optional</span>
+            </label>
+            <div class="file-wrap">
+              <span class="icon">📦</span>
+              <div>
+                <span class="main">Choose inventory.xlsx</span><br>
+                <span class="sub">For On Hand & IRC matching</span>
+              </div>
+              <input type="file" name="inventory_file" accept=".xlsx">
+            </div>
+          </div>
+
+          <div class="field">
+            <label>
+              <span>Ignore list</span>
+              <span class="tag">Optional</span>
+            </label>
+            <div class="file-wrap">
+              <span class="icon">🚫</span>
+              <div>
+                <span class="main">Choose ignore.xlsx</span><br>
+                <span class="sub">Stock codes to exclude</span>
+              </div>
+              <input type="file" name="ignore_file" accept=".xlsx">
+            </div>
+          </div>
+
+          <div class="field">
+            <label>
+              <span>IRC list</span>
+              <span class="tag">Optional</span>
+            </label>
+            <div class="file-wrap">
+              <span class="icon">🏷️</span>
+              <div>
+                <span class="main">Choose IRC.xlsx</span><br>
+                <span class="sub">Rebate amounts & start/end dates</span>
+              </div>
+              <input type="file" name="irc_file" accept=".xlsx">
+            </div>
+            <div class="hint-small">Use your IRC sheet renamed to <strong>IRC.xlsx</strong>-style layout.</div>
+          </div>
+        </div>
+
+        <div class="right-panel">
+          <div class="status-row">
+            <span>What you’ll get</span>
+            <span class="pill-status">Excel · multi-sheet</span>
+          </div>
+          <ul class="steps">
+            <li>
+              <span class="bullet">1</span>
+              <span class="text">Uploads are combined in memory using your existing business rules.</span>
+            </li>
+            <li>
+              <span class="bullet">2</span>
+              <span class="text"><code>reorder_report.xlsx</code> is generated with FULL DATA, 1–4 WEEK SUPPLY, IRC, and IRC NEW ITEMS.</span>
+            </li>
+            <li>
+              <span class="bullet">3</span>
+              <span class="text">Your browser automatically downloads the final workbook.</span>
+            </li>
+          </ul>
+
+          <button type="submit" id="submitBtn">
+            <span class="loader"></span>
+            <span class="label">Generate report</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        <span>Runs your existing Python logic on the server.</span>
+        <span class="right">Just drop files → get Excel.</span>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const form = document.querySelector("form");
+    const btn = document.getElementById("submitBtn");
+
+    form.addEventListener("submit", () => {
+      btn.classList.add("loading");
+      btn.disabled = true;
+    });
+  </script>
+</body>
+</html>
